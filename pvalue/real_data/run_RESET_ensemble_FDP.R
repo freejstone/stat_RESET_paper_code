@@ -1,5 +1,6 @@
 library(stepdownfdp)
-source('../../competition/R_code/ensemble_functions.R')
+source('../../R_code/ensemble_functions.R')
+source('../../R_code/helper_functions.R')
 source('../functions/guo.R')
 
 files <- c(
@@ -9,9 +10,9 @@ files <- c(
   "microbiome_enigma_ph",
   "microbiome_enigma_al",
   "proteomics",
-  "fmri_auditory","fmri_imagination"
-#  "adipose_subcutaneous",
- # "adipose_visceral_omentum"
+  "fmri_auditory","fmri_imagination",
+  "adipose_subcutaneous",
+  "adipose_visceral_omentum"
 )
 data_path <- "./data_files/"
 
@@ -60,6 +61,7 @@ for (file in files) {
   pvals = pvals[pvals <= 0.9]
   W = pvals
   W[pvals > 0.3] = 0.3 - (pvals[pvals > 0.3] - 0.3)/2
+  W[W < 0] = 0
   W = abs(qnorm(W))
   W = W*((pvals <= 0.3) - (pvals > 0.3))
   W[W == Inf] = max(W[W!=Inf])
@@ -67,6 +69,8 @@ for (file in files) {
   x = data.frame(x)
   mult = 2
   reps = 10
+  decoy_int = c(0.3, 0.9)
+  target_upper = 0.3
   if (file %in% c('airway', 'bottomly', 'pasilla')) {
     W=W[x>=0]
     pvals = pvals[x>=0]
@@ -88,15 +92,17 @@ for (file in files) {
   for (seed in 22072024:(22072024 + 9)) {
     for (alpha in alphas) {
       start.time = Sys.time()
-      res = filter_ensemble_RESET(W, x, verbose = TRUE, test_alpha = alpha, seed = seed, mult = mult, reps = reps, get_nn = NULL, num_cores = 10)
+      res = filter_ensemble_RESET(W, x, decoy_int = decoy_int, target_upper = target_upper,
+                                  verbose = TRUE, test_alpha = alpha, seed = seed,
+                                  mult = mult, reps = reps, num_cores = 20)
       scores = rank(res$score[res$pseudo_Labels == 1], ties.method = 'random')
       labels = res$Labels[res$pseudo_Labels == 1]
       end.time = Sys.time()
-      
       for (conf in c(0.1, 0.2, 0.5)) {
         res = fdp_sd(cbind(scores, labels), alpha = alpha, conf = conf, c = 1/2, lambda = 1/2, procedure = 'coinflip')
         total.time = difftime(end.time, start.time, units='mins')
         power = length(res$discoveries)
+        print(power)
         out = rbind(out, list(alpha = alpha, type = 'reset_ensemble', power = power, time = total.time, conf = conf, seed = seed))
       }
       
@@ -121,5 +127,5 @@ for (file in files) {
     }
   }
   
-  write.csv(out, paste('results/', file,'_fdp_reset_all.csv', sep = ''))
+  write.csv(out, paste('results/', file,'_fdp_dep_reset_all.csv', sep = ''))
 }

@@ -1,30 +1,30 @@
 #!/bin/bash
 
 section1() {
-    values=($(seq 1 100))
+    values=($(seq 1 1))
     for value in "${values[@]}"; do 
-        Rscript RESET_ensemble.R data1 sim1_"${value}".csv result_data1/reset_all_sim1_"${value}".csv "${value}"
+        Rscript RESET_ensemble.R data1 sim1_"${value}".csv result_data1/reset_sim1_CHECK"${value}".csv "${value}"
     done 
 }
 
 section2() {
-    values=($(seq 1 100))
+    values=($(seq 1 1))
     for value in "${values[@]}"; do 
-        Rscript RESET_ensemble.R data1 sim2_"${value}".csv result_data1/reset_all_sim2_"${value}".csv "${value}"
+        Rscript RESET_ensemble.R data1 sim2_"${value}".csv result_data1/reset_sim2_CHECK"${value}".csv "${value}"
     done 
 }
 
 section3() {
-    values=($(seq 1 100))
+    values=($(seq 1 1))
     for value in "${values[@]}"; do 
-        Rscript RESET_ensemble.R data1 sim3_"${value}".csv result_data1/reset_all_sim3_"${value}".csv "${value}"
+        Rscript RESET_ensemble.R data1 sim3_"${value}".csv result_data1/reset_sim3_CHECK"${value}".csv "${value}"
     done 
 }
 
 section4() {
-    values=($(seq 1 100))
+    values=($(seq 1 1))
     for value in "${values[@]}"; do 
-        Rscript RESET_ensemble.R data2 sim_"${value}".csv result_data2/reset_all_sim_"${value}".csv "${value}"
+        Rscript RESET_ensemble.R data2 sim_"${value}".csv result_data2/reset_sim_CHECK"${value}".csv "${value}"
     done 
 }
 

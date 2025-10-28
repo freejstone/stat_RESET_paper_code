@@ -1,6 +1,7 @@
 #libraries
 library(tidyverse)
-source("../R_code/ensemble_functions.R")
+source("../../R_code/ensemble_functions.R")
+source("../../R_code/helper_functions.R")
 
 #for parallelization
 RNGkind(kind = "L'Ecuyer-CMRG")
@@ -11,9 +12,9 @@ set.seed(5022024)
 INDs = c(0:4)
 
 df_all = data.frame(discoveries = c(),
-                alpha = c(),
-                time = c(),
-                type = c()
+                    alpha = c(),
+                    time = c(),
+                    type = c()
 )
 
 for (ind in INDs) {
@@ -28,15 +29,15 @@ for (ind in INDs) {
   
   df = df[!duplicated(df$original_target_sequence), ]
   
-  W = df$XCorr
+  W = df$XCorr - min(df$XCorr) #Can be negative so adjusting
   Labels = (df$Label)
   z = df %>% dplyr::select('deltCn', 'Charge2', 'Charge3', 'Charge4', 'Charge5', 'PepLen', 'lnNumDSP', 'dM', 'absdM')
   z = as.matrix(z)
   
   start.time = Sys.time()
-  res = filter_ensemble_RESET(W, z, Labels, verbose = TRUE, test_alpha = 0.01, 
+  res = filter_ensemble_RESET(W, z, Labels = Labels, verbose = TRUE, test_alpha = 0.01, 
                               seed = ind + 5022024, mult = 1, reps = 10, 
-                              n_nodes = c(2, 5, 10), decays = c(0, 0.1, 1), num_cores = 20, get_nn = FALSE)
+                              num_cores = 20, dependent = FALSE)
   end.time = Sys.time()
   total.time = difftime(end.time, start.time, units='mins')
   power = sum(res$q_vals <= 0.01 & res$pseudo_Labels == 1 & res$Labels == 1)

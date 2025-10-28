@@ -62,7 +62,7 @@ for(file in files){
   
   # These p-value distributions violate assumptions, we resample the p-values from the interval [0.3,0.9]
   # randomize <- (grepl("airway",file) | grepl("pasilla",file))
-  # seems more natural to delete them.
+  # seems more natural to delete them + I don't think they violate assumptions.
   if (file %in% c('airway', 'pasilla', 'bottomly')) {
     pvals = pvals[x>=0]
     x=x[x>=0]

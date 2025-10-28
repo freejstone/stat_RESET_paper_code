@@ -1,7 +1,8 @@
 library(adaptMT)
 library(stepdownfdp)
 source('../functions/guo.R')
-source('../../competition/R_code/ensemble_functions.R')
+source('../../R_code/ensemble_functions.R')
+source('../../R_code/helper_functions.R')
 data(estrogen)
 
 set.seed(14072024)
@@ -40,7 +41,9 @@ for (i in 1:2){
   for (seed in 22072024:(22072024 + 9)) {
     for (alpha in alphas) {
       start.time = Sys.time()
-      res = filter_ensemble_RESET(W, x, verbose = TRUE, test_alpha = alpha, seed = seed, mult = mult, reps = reps, get_nn = NULL, num_cores = 10)
+      res = filter_ensemble_RESET(W, x,
+                                  verbose = TRUE, test_alpha = alpha, seed = seed,
+                                  mult = mult, reps = reps, num_cores = 20)
       scores = rank(res$score[res$pseudo_Labels == 1], ties.method = 'random')
       labels = res$Labels[res$pseudo_Labels == 1]
       end.time = Sys.time()
@@ -73,5 +76,5 @@ for (i in 1:2){
     }
   }
   
-  write.csv(out, paste('results/', 'estrogen_fdp_reset_ensemble.csv', sep = ''))
+  write.csv(out, paste('results/', 'estrogen_fdp_dep_reset_ensemble.csv', sep = ''))
 }

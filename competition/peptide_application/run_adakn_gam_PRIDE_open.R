@@ -24,7 +24,7 @@ df_all = data.frame(discoveries = c(),
                     PXID = c()
 )
 
-df = read_delim(paste('data/', PXID, '/narrow_1_0.make-pin.pin', sep = ''))
+df = read_delim(paste('data/', PXID, '/open_1_0.make-pin.pin', sep = ''))
 peptide_list = read_delim(paste('data/', PXID, '/index-0/tide-index.peptides.txt', sep = ''))
 
 df = df[sample(nrow(df)), ]
@@ -46,38 +46,13 @@ z = as.matrix(z)
 print('running AdaKF filters now')
 
 prop = 0.1
-print('running AdaKF EM')
-W1 = df$TailorScore - min(df$TailorScore)
-W1 = abs(W1)*(df$Label)
-W1[abs(W1) <= 1e-3] = 0
-s0 = quantile(abs(W1)[W1!=0],reveal_prop=prop, 0.1)
-start.time = Sys.time()
-res_em = filter_EM(W1, z, alpha = 0.01, s0 = s0)
-end.time = Sys.time()
-total.time_em = difftime(end.time, start.time, units='mins')
-print(total.time_em)
-print('running AdaKF GLM')
-start.time = Sys.time()
-res_glm = filter_glm(W, z, alpha = 0.01, reveal_prop = prop)
-end.time = Sys.time()
-total.time_glm = difftime(end.time, start.time, units='mins')
-print(total.time_glm)
 print('running AdaKF GAM')
 start.time = Sys.time()
 res_gam = filter_gam(W, z, alpha = 0.01, reveal_prop = prop)
 end.time = Sys.time()
 total.time_gam = difftime(end.time, start.time, units='mins')
 print(total.time_gam)
-print('running AdaKF RF')
-start.time = Sys.time()
-res_rf = filter_randomForest(W, z, alpha = 0.01, reveal_prop = prop)
-end.time = Sys.time()
-total.time_rf = difftime(end.time, start.time, units='mins')
-print(total.time_rf)
 
-df_all = rbind(df_all, list(discoveries = res_rf$nrejs[1], alpha = 0.01, time = total.time_rf, type = 'RF', PXID = PXID))
-df_all = rbind(df_all, list(discoveries = res_glm$nrejs[1], alpha = 0.01, time = total.time_glm, type = 'GLM', PXID = PXID))
 df_all = rbind(df_all, list(discoveries = res_gam$nrejs[1], alpha = 0.01, time = total.time_gam, type = 'GAM', PXID = PXID))
-df_all = rbind(df_all, list(discoveries = res_em$nrejs[1], alpha = 0.01, time = total.time_em, type = 'EM', PXID = PXID))
 
-write.csv(df_all, paste('results/adakn_power_narrow', PXID, '.csv', sep = ''))
+write.csv(df_all, paste('results/adakn_gam_power_open', PXID, '.csv', sep = ''))

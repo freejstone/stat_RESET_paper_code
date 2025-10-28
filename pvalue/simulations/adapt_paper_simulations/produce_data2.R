@@ -1,3 +1,6 @@
+# Note that when I originally ran the data in R, RNGkind was set to L'Euyer-CMRG.
+# Hence the following line is needed to reproduce the 100 runs.
+RNGkind(kind = "L'Ecuyer-CMRG")
 set.seed(15052024)
 repeat_times <- 100
 

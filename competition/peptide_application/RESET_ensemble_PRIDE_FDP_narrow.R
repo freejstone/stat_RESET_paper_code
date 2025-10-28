@@ -1,7 +1,8 @@
 #libraries
 library(tidyverse)
 library(stepdownfdp)
-source("../R_code/ensemble_functions.R")
+source("../../R_code/ensemble_functions.R")
+source("../../R_code/helper_functions.R")
 
 #for parallelization
 RNGkind(kind = "L'Ecuyer-CMRG")
@@ -46,7 +47,7 @@ for (PXID in PXIDs) {
     start.time = Sys.time()
     res = filter_ensemble_RESET(W, z, Labels = Labels, verbose = TRUE, test_alpha = 0.01, 
                                 seed = seed + 5022024, mult = 1, reps = 10, 
-                                n_nodes = c(2, 5, 10), decays = c(0, 0.1, 1), num_cores = 10, get_nn = FALSE)
+                                num_cores = 20, dependent = FALSE)
     scores = rank(res$score[res$pseudo_Labels == 1], ties.method = 'random')
     labels = res$Labels[res$pseudo_Labels == 1]
     end.time = Sys.time()

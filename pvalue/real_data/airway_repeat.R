@@ -2,15 +2,7 @@ source('../../R_code/ensemble_functions.R')
 source('../../R_code/helper_functions.R')
 
 files <- c(
-  "fmri_auditory","fmri_imagination",
-  "airway",
-  "pasilla",
-  "bottomly",
-  "microbiome_enigma_ph",
-  "microbiome_enigma_al",
-  "proteomics",
-  "adipose_subcutaneous",
-  "adipose_visceral_omentum"
+  "airway"
 )
 data_path <- "./data_files/"
 
@@ -44,7 +36,7 @@ preprocess <- function(file){
   return(list(x=x,pvals=pvals))
 }
 
-alphas <- c(0.01, 0.05, 0.1, 0.2)
+alphas <- c(0.1)
 
 set.seed(22052024)
 
@@ -96,7 +88,7 @@ for (file in files) {
   if (file %in% c("adipose_subcutaneous", "adipose_visceral_omentum")) {
     seeds = 22072024
   } else {
-    seeds = 22072024:(22072024 + 9)
+    seeds = 22072024:(22072024 + 99)
   }
   
   for (seed in seeds) {
@@ -110,42 +102,5 @@ for (file in files) {
                             time = difftime(end, start, units='mins'), flag = res$flag, seed = seed))
     }
   }
-  
-  for (seed in seeds) {
-    for (alpha in alphas) {
-      start = Sys.time()
-      res = filter_ensemble_RESET(W, x, decoy_int = decoy_int, target_upper = target_upper, methods = 'gam',
-                                  verbose = TRUE, test_alpha = alpha, seed = seed,
-                                  mult = mult, reps = reps, num_cores = 20)
-      end = Sys.time()
-      out = rbind(out, list(alpha = alpha, type = 'reset_gam', power = sum(res$q_vals <= alpha & res$Labels == 1), 
-                            time = difftime(end, start, units='mins'),  flag = res$flag, seed = seed))
-    }
-  }
-  
-  for (seed in seeds) {
-    for (alpha in alphas) {
-      start = Sys.time()
-      res = filter_ensemble_RESET(W, x, decoy_int = decoy_int, target_upper = target_upper, methods = 'rf',
-                                  verbose = TRUE, test_alpha = alpha, seed = seed,
-                                  mult = mult, reps = reps, num_cores = 20)
-      end = Sys.time()
-      out = rbind(out, list(alpha = alpha, type = 'reset_rf', power = sum(res$q_vals <= alpha & res$Labels == 1), 
-                            time = difftime(end, start, units='mins'), flag = res$flag, seed = seed))
-    }
-  }
-  
-  for (seed in seeds) {
-    for (alpha in alphas) {
-      start = Sys.time()
-      res = filter_ensemble_RESET(W, x, decoy_int = decoy_int, target_upper = target_upper, methods = 'nn',
-                                  verbose = TRUE, test_alpha = alpha, seed = seed,
-                                  mult = mult, reps = reps, num_cores = 20)
-      end = Sys.time()
-      out = rbind(out, list(alpha = alpha, type = 'reset_nn', power = sum(res$q_vals <= alpha & res$Labels == 1), 
-                            time = difftime(end, start, units='mins'), flag = res$flag, seed = seed))
-    }
-  }
-
-  write.csv(out, paste('results/', file,'_dep_reset_all.csv', sep = ''))
+  write.csv(out, paste('results/', file,'_rep_reset_all.csv', sep = ''))
 }
